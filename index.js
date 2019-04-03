@@ -7,7 +7,6 @@ var jwt = require('jsonwebtoken');
 var config = require('./config');
 
 
-
 //db configuration
 var connection = mysql.createConnection({
 	host     : '192.168.15.14',
@@ -33,6 +32,8 @@ app.post('/auth', function(request, response) {
 	const username = request.body.username;
     const password = request.body.password;
     let userJSON = {};
+    const currentTime = new Date();
+    console.log(currentTime);
 	if (username && password) {
 		connection.query('SELECT * FROM accounts WHERE username = ? AND password = ?', [username, password], function(error, results, fields) {
             console.log(results);
@@ -40,11 +41,24 @@ app.post('/auth', function(request, response) {
 			if (results.length > 0) {
 				request.session.loggedin = true;
                 request.session.username = username;
+                let userCredentials = {
+                    'userName' : results[0]['username'],
+                    'email':results[0]['email']
+                }
+                console.log(userCredentials);
                 //Create token
-                var token = jwt.sign({ id: results[0].id }, config.secret, {
+                var token = jwt.sign(userCredentials, config.secret, {
                     expiresIn: '2h' // expires in 2 hours
-                  });
-                console.log("token:********",token);
+                  }); 
+                var decoded = jwt.verify(token,config.secret,function(error,decode){
+                    if(error){
+                        console.log(error);
+                    }else{
+                        console.log(decode);
+                    }
+                })
+                console.log(decoded);
+                request.session.token = token;
                 userJSON['status'] = true;
                 userJSON['message'] = "Registration Completed Sucessfully";
                 userJSON['data'] = {};
