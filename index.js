@@ -9,7 +9,7 @@ var config = require('./config');
 
 //db configuration
 var connection = mysql.createConnection({
-	host     : '192.168.15.14',
+	host     : 'localhost',
 	user     : 'root',
 	password : 'softinc',
 	database : 'nodelogin'
